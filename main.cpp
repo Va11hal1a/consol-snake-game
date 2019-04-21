@@ -1,8 +1,13 @@
 #include <iostream>
+#include <conio.h>
+#include <fstream>
+#include <windows.h>
+#include <stdio.h>
 
 using namespace std;
+//using namespace std::basic_ifstream;
 
-const int _SIZE = 20;
+const int _SIZE = 30;
 const int _BORDER_WIDTH = 1;
 const char WALL = '#';
 
@@ -22,6 +27,8 @@ public:
 		this -> x = x;
 		this -> y = y;
 	}
+	vec2():x(0), y(0){
+	}
 };
 
 class snake{
@@ -31,8 +38,8 @@ public:
 	vec2 direct;
 	static const int _size = 20;
 	int dinamic_size;
-	snake(): head(_SIZE / 2, _SIZE / 2), direct(0, 1){
-		body = (vec2*) malloc(_size);
+	snake(): head(_SIZE / 2, _SIZE / 2), direct(1, 0){
+		body = new vec2[_SIZE];
 		dinamic_size = 0;
 	}
 	void trace_to_display(display* disp){
@@ -42,11 +49,27 @@ public:
 		}
 	}
 	void add_last(){
+		int x, y; 
+		if(dinamic_size >= 1){ x = body[dinamic_size - 1].x; y = body[dinamic_size - 1].y;}
+		else {x = head.x; y = head.y;}
+		body[dinamic_size].x =  x - direct.x;
+		body[dinamic_size].y =  y - direct.y;
 		dinamic_size++;
-		int x = (body + dinamic_size - 1) -> x;
-		int y = (body + dinamic_size - 1) -> y;
-		(body + dinamic_size) -> x = x - direct.x;
-		(body + dinamic_size) -> y = y - direct.y;
+	}
+	void move(){
+		vec2* temp = new vec2[_size];
+		for(int i = 0; i < dinamic_size; i++){
+			temp[i] = body[i];
+		}
+		this -> body[0] = head;
+		this -> head = vec2(head.x + direct.x, head.y + direct.y);
+		for(int i = 1; i < dinamic_size; i++){
+			body[i] = temp[i - 1];
+	    }
+		delete temp;
+	}
+	void dispose(){
+		delete body;
 	}
 };
 
@@ -63,7 +86,7 @@ void display::clr(){
 }
 
 void display::set(int x, int y, char s){
-	if(x+1 >= _SIZE || y+1 >= _SIZE) return;
+	if(x+1 >= _SIZE || y+1 >= _SIZE || x < 0 || y < 0) return;
 	buffer[x+1][y+1] = s;
 }
 
@@ -80,18 +103,90 @@ void display::push_buffer(){
 	}
 }
 
+void controller(snake* snk){
+	if(_kbhit()){
+		char a = getch();
+		switch(a){
+		case 'd':
+			snk -> direct = vec2(1, 0);
+			break;
+		case 'a':
+			snk -> direct = vec2(-1, 0);
+			break;
+		case 's':
+			snk -> direct = vec2(0, 1);
+			break;
+		case 'w':
+			snk -> direct = vec2(0, -1);
+			break;
+		}
+	}
+}
+
+class food_gen{
+public:
+	vec2 apple_pos;
+	void check(snake* snk){
+		if(snk -> head.x == apple_pos.x && snk -> head.y == apple_pos.y){
+			generate();
+			snk -> add_last();
+		}
+	}
+	void generate(){
+		apple_pos = vec2(rand() % _SIZE + 1, rand() % _SIZE + 1);
+	}
+	void draw(display* disp_handler){
+		disp_handler -> set(apple_pos.x, apple_pos.y, '#');
+	}
+};
+
+void load(){
+	char *_name = new char[256];
+	//std::string val;
+	GetModuleFileName(GetModuleHandle(0), _name, 256);
+	cout << _msize(_name);
+	//std::ifstream FILE();
+}
+
+int find_at_first(char* value, char separate, int nsize){
+	for(int i = 0; i < nsize; i++){
+		if(*(value + i) == separate){
+			return i;
+		}
+	}
+}
+
+int find_at_last(char* value, char separate){
+	int result;
+	//cout << _msize(value);
+	int ab;
+	cin >> ab;
+	return 0;
+}
 
 int main(){
+	char* s = "asasas asa as";
+	cout << find_at_first(s, ' ', 13);
+	load();
 	snake snk = snake();
+	food_gen fg = food_gen();
 	snk.add_last();
 	snk.add_last();
+	snk.add_last();
+	snk.add_last();
+	fg.generate();
 	display a;
 	while(true){
+	controller(&snk);
 	a.begin();
-	a.set(0,0,'a');
+	snk.move();
 	snk.trace_to_display(&a);
+	fg.draw(&a);
+	fg.check(&snk);
 	a.push_buffer();
+	Sleep(500);
 	a.clr();
 	}
 	return 0;
+	snk.dispose();
 }
