@@ -133,42 +133,36 @@ public:
 		}
 	}
 	void generate(){
+		do{
 		apple_pos = vec2(rand() % _SIZE + 1, rand() % _SIZE + 1);
+		}while(apple_pos.x >= _SIZE || apple_pos.y >= _SIZE || apple_pos.x <= 0 || apple_pos.y <= 0);
 	}
 	void draw(display* disp_handler){
 		disp_handler -> set(apple_pos.x, apple_pos.y, '#');
 	}
 };
 
-void load(){
-	char *_name = new char[256];
-	//std::string val;
-	GetModuleFileName(GetModuleHandle(0), _name, 256);
-	cout << _msize(_name);
-	//std::ifstream FILE();
+void start_menu(){
+
 }
 
-int find_at_first(char* value, char separate, int nsize){
-	for(int i = 0; i < nsize; i++){
-		if(*(value + i) == separate){
-			return i;
-		}
+void save(){
+	ofstream FILE;
+	FILE.open("D:\data/saves/savemng.txt");
+}
+
+void load(){
+	ifstream FILE("D:/data/saves/savemng.txt");
+	if(!FILE.is_open()){
+		cout << "Данного файла не существует";
 	}
 }
 
-int find_at_last(char* value, char separate){
-	int result;
-	//cout << _msize(value);
-	int ab;
-	cin >> ab;
-	return 0;
-}
-
 int main(){
-	char* s = "asasas asa as";
-	cout << find_at_first(s, ' ', 13);
-	load();
+	setlocale(LC_ALL, "rus");
+	save();
 	snake snk = snake();
+	system("pause");
 	food_gen fg = food_gen();
 	snk.add_last();
 	snk.add_last();
@@ -177,15 +171,15 @@ int main(){
 	fg.generate();
 	display a;
 	while(true){
-	controller(&snk);
-	a.begin();
-	snk.move();
-	snk.trace_to_display(&a);
-	fg.draw(&a);
-	fg.check(&snk);
-	a.push_buffer();
-	Sleep(500);
-	a.clr();
+	  controller(&snk);
+	  a.begin();
+	  snk.move();
+	  snk.trace_to_display(&a);
+	  fg.draw(&a);
+	  fg.check(&snk);
+	  a.push_buffer();
+	  Sleep(500);
+	  a.clr();
 	}
 	return 0;
 	snk.dispose();
